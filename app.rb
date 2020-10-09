@@ -7,6 +7,7 @@ require './models/document.rb'
 require './models/documentsUser.rb'
 require 'sinatra-websocket'
 
+# clase que contiene las rutas y metodos de la aplicacion.
 class App < Sinatra::Base
   register Sinatra::ConfigFile
 
