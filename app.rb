@@ -30,12 +30,12 @@ class App < Sinatra::Base
       redirect '/login'
     elsif session[:user_id]
       @user = User.find(id: session[:user_id])
-      is_admin unless @user.nil?
+      isadmin? unless @user.nil?
     end
   end
 
   use Rack::Session::Pool, expire_after: 2_592_000
-  def is_admin
+  def isadmin?
     user = User.find(id: session[:user_id]).type
     @isAdmin = true if user == 'admin'
   end
