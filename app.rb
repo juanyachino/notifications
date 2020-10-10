@@ -186,7 +186,7 @@ class App < Sinatra::Base
 
         socketsToBeNotified = []
         # settings.userlist.each { |taggedUser|  socketsToBeNotified << (findConnection(taggedUser))  }
-        settings.userlist.each { |taggedUser| unless findConnection(taggedUser).nil? then socketsToBeNotified << (findConnection(taggedUser)) end }
+        settings.userlist.each { |tagged_user| unless findConnection(tagged_user).nil? then socketsToBeNotified << (findConnection(tagged_user)) end }
 
         # logger.info socketsToBeNotified  # ya no es vacio
         socketsToBeNotified.each { |s| s.send('han cargado un nuevo documento!') }
