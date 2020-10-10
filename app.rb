@@ -133,7 +133,6 @@ class App < Sinatra::Base
   end
 
   post '/documents' do
-    user = User.first(username: params[:users])
     filter_docs = Document.all
 
     doc_date = params[:date] == '' ? filter_docs : Document.first(date: params[:date])
