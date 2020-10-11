@@ -60,7 +60,7 @@ end
 class Documents < Sinatra::Base
   set :userlist, []
 
-  def findConnection(user)
+  def find_connection(user)
     App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
 
     nil # Por si el usuario no esta conectado en ese momento
@@ -70,7 +70,7 @@ class Documents < Sinatra::Base
   get '/documents' do
     user = User.find(id: session[:user_id]).type
     if user == 'admin'
-      @isAdmin = true
+      @is_admin = true
       @documents = Document.all
       @users = User.all
       erb :upload, layout: :layoutlogin
@@ -122,11 +122,11 @@ class Documents < Sinatra::Base
         params['tagged'].each { |n| settings.userlist << (User.find(username: n)) }
         settings.userlist.each { |u| u.add_document(doc) }
 
-        socketsToBeNotified = []
+        sockets_to_be_notified = []
 
-        settings.userlist.each { |tagged_user| unless findConnection(tagged_user).nil? then socketsToBeNotified << (findConnection(tagged_user)) end }
+        settings.userlist.each { |tagged_user| unless find_connection(tagged_user).nil? then sockets_to_be_notified << (find_connection(tagged_user)) end }
 
-        socketsToBeNotified.each { |s| s.send('han cargado un nuevo documento!') }
+        sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
 
       end
       redirect '/documents'
@@ -175,14 +175,14 @@ class App < Sinatra::Base
       redirect '/login'
     elsif session[:user_id]
       @user = User.find(id: session[:user_id])
-      isadmin? unless @user.nil?
+      is_admin unless @user.nil?
     end
   end
 
   use Rack::Session::Pool, expire_after: 2_592_000
-  def isadmin?
+  def is_admin
     user = User.find(id: session[:user_id]).type
-    @isAdmin = true if user == 'admin'
+    @is_admin = true if user == 'admin'
   end
   get '/' do
     if !request.websocket?
