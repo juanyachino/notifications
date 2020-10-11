@@ -22,7 +22,10 @@ class LoginScreen < Sinatra::Base
       request.body.rewind
       hash = Rack::Utils.parse_nested_query(request.body.read)
       params = JSON.parse hash.to_json
-      user = User.new(name: params['name'], email: params['email'], username: params['username'], password: params['psw'])
+      user = User.new(name: params['name'], 
+                      email: params['email'], 
+                      username: params['username'], 
+                      password: params['psw'])
       if user.save
         redirect '/login'
       else
@@ -72,7 +75,8 @@ class Documents < Sinatra::Base
       @users = User.all
       erb :upload, layout: :layoutlogin
     else
-      @error = 'Para acceder a documentos debe ser administrador, si desea serlo complete los campos'
+      @error = 'Para acceder a documentos debe ser administrador, ' \
+               'si desea serlo complete los campos'
       erb :admin, layout: :layoutlogin
     end
   end
@@ -105,7 +109,10 @@ class Documents < Sinatra::Base
       f.write(file.read)
     end
     user = User.find(id: session[:user_id]).username
-    doc = Document.new(name: @filename, date: params['date'], uploader: user, subject: params['subject'])
+    doc = Document.new(name: @filename, 
+                       date: params['date'], 
+                       uploader: user, 
+                       subject: params['subject'])
 
     if doc.save
 
