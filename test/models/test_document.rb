@@ -14,7 +14,8 @@ class DocumentTest < Minitest::Unit::TestCase
 	end
 
 	def test_create_invalid_document
-  		@document = Document.new(name:' , date:', uploader:' , subject:' )
+  		@document = Document.new(name:' , date:',
+  								 uploader:' , subject:')
   		assert_equal @document.valid?, false
 	end
 
