@@ -36,10 +36,10 @@ class App < Sinatra::Base
   use Rack::Session::Pool, expire_after: 2_592_000
   def is_admin
     user = User.find(id: session[:user_id]).type
-    @isAdmin = true if user == 'admin'
+    @is_admin = true if user == 'admin'
   end
 
-  def findConnection(user)
+  def find_connection(user)
     # logger.info user.id
     # settings.sockets.each { |test| logger.info test[:user] }
     settings.sockets.each { |s| return s[:socket] if s[:user] == user.id }
@@ -121,7 +121,7 @@ class App < Sinatra::Base
   get '/documents' do
     user = User.find(id: session[:user_id]).type
     if user == 'admin'
-      @isAdmin = true
+      @is_admin = true
       @documents = Document.all
       @users = User.all
       erb :upload, layout: :layoutlogin
@@ -184,12 +184,12 @@ class App < Sinatra::Base
         # logger.info params["tagged"] # esta correcto, contiene un username
         # logger.info settings.userlist #esta correcto, hay un objeto del tipo User
 
-        socketsToBeNotified = []
+        sockets_to_be_notified = []
         # settings.userlist.each { |taggedUser|  socketsToBeNotified << (findConnection(taggedUser))  }
-        settings.userlist.each { |taggedUser| unless findConnection(taggedUser).nil? then socketsToBeNotified << (findConnection(taggedUser)) end }
+        settings.userlist.each { |tagged_user| unless find_connection(tagged_user).nil? then sockets_to_be_notified << (find_connection(tagged_user)) end }
 
         # logger.info socketsToBeNotified  # ya no es vacio
-        socketsToBeNotified.each { |s| s.send('han cargado un nuevo documento!') }
+        sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
         # #settings.sockets.each{ |s|  s[:socket].send("han cargado un nuevo documento!") }
         # redirect "/documents"
       end
