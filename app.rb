@@ -22,9 +22,9 @@ class LoginScreen < Sinatra::Base
       request.body.rewind
       hash = Rack::Utils.parse_nested_query(request.body.read)
       params = JSON.parse hash.to_json
-      user = User.new(name: params['name'], 
-                      email: params['email'], 
-                      username: params['username'], 
+      user = User.new(name: params['name'],
+                      email: params['email'],
+                      username: params['username'],
                       password: params['psw'])
       if user.save
         redirect '/login'
@@ -109,9 +109,9 @@ class Documents < Sinatra::Base
       f.write(file.read)
     end
     user = User.find(id: session[:user_id]).username
-    doc = Document.new(name: @filename, 
-                       date: params['date'], 
-                       uploader: user, 
+    doc = Document.new(name: @filename,
+                       date: params['date'],
+                       uploader: user,
                        subject: params['subject'])
 
     if doc.save
@@ -180,7 +180,7 @@ class App < Sinatra::Base
   end
 
   use Rack::Session::Pool, expire_after: 2_592_000
-  def is_admin
+  def admin?
     user = User.find(id: session[:user_id]).type
     @is_admin = true if user == 'admin'
   end
