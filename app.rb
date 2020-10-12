@@ -124,7 +124,9 @@ class Documents < Sinatra::Base
 
         sockets_to_be_notified = []
 
-        settings.userlist.each { |tagged_user| unless find_connection(tagged_user).nil? then sockets_to_be_notified << (find_connection(tagged_user)) end }
+        settings.userlist.each do |taggedUser|
+          socketsToBeNotified << (findConnection(taggedUser)) unless findConnection(taggedUser).nil?
+        end
 
         sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
 
