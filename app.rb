@@ -7,64 +7,8 @@ require './models/document.rb'
 require './models/documentsUser.rb'
 require 'sinatra-websocket'
 
-class App < Sinatra::Base
-  register Sinatra::ConfigFile
-
-  config_file 'config/config.yml'
-
-  configure :development, :production do
-    enable :logging
-    enable :sessions
-    set :session_secret, 'So0perSeKr3t!'
-    set :sessions, true
-    set :server, :thin
-    set :sockets, []
-    set :userlist, []
-  end
-
-  before do
-    @path = request.path_info
-
-    if !session[:user_id] && @path != '/login' && @path != '/register'
-      redirect '/login'
-    elsif session[:user_id]
-      @user = User.find(id: session[:user_id])
-      is_admin unless @user.nil?
-    end
-  end
-
-  use Rack::Session::Pool, expire_after: 2_592_000
-  def is_admin
-    user = User.find(id: session[:user_id]).type
-    @isAdmin = true if user == 'admin'
-  end
-
-  def findConnection(user)
-    # logger.info user.id
-    # settings.sockets.each { |test| logger.info test[:user] }
-    settings.sockets.each { |s| return s[:socket] if s[:user] == user.id }
-
-    nil # Por si el usuario no esta conectado en ese momento
-  end
-
-  get '/' do
-    if !request.websocket?
-      erb :index, layout: :layoutlogin
-    else
-      request.websocket do |ws|
-        user = session[:user_id]
-        @connection = { user: user, socket: ws }
-        ws.onopen do
-          settings.sockets << @connection
-        end
-        ws.onclose do
-          warn('websocket closed')
-          settings.sockets.delete(ws)
-        end
-      end
-    end
-  end
-
+# clase que contiene las rutas y metodos relacionados al login y registro de usuario.
+class LoginScreen < Sinatra::Base
   # Add new user
   get '/register' do
     erb :register
@@ -110,21 +54,23 @@ class App < Sinatra::Base
     # response.set_cookie("user_id", value: "", expires: Time.now - 100 )
     redirect '/'
   end
+end
 
-  # Endpoints for handles profile
-  get '/profile' do
-    @documents = Document.all
-    @user = User.first(id: session[:user_id]).name
-    @mail = User.first(id: session[:user_id]).email
-    # @user = session[:user_id]
-    erb :perfil, layout: :layoutlogin
+# clase que contiene las rutas y metodos relacionados al login y registro de usuario.
+class Documents < Sinatra::Base
+  set :userlist, []
+
+  def find_connection(user)
+    App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
+
+    nil # Por si el usuario no esta conectado en ese momento
   end
 
   # Endpoints for upload a document
   get '/documents' do
     user = User.find(id: session[:user_id]).type
     if user == 'admin'
-      @isAdmin = true
+      @is_admin = true
       @documents = Document.all
       @users = User.all
       erb :upload, layout: :layoutlogin
@@ -136,7 +82,6 @@ class App < Sinatra::Base
   end
 
   post '/documents' do
-    user = User.first(username: params[:users])
     filter_docs = Document.all
 
     doc_date = params[:date] == '' ? filter_docs : Document.first(date: params[:date])
@@ -177,30 +122,14 @@ class App < Sinatra::Base
         params['tagged'].each { |n| settings.userlist << (User.find(username: n)) }
         settings.userlist.each { |u| u.add_document(doc) }
 
-        # logger.info usertaged
-        # esta linea no va aca  @connection = {user: user, socket: ws}
-        # to cortar if (settings.userlist.include?(s[:user])) then ............ end
-        # settings.sockets.each{ |s|   s[:socket].send("han cargado un nuevo documento!") }
-        # if (settings.userlist.include?(user))
-        #  @isTagged= true
-        #  else
-        #   @isTagged = false
-        #  end
-        ##  notificar
+        sockets_to_be_notified = []
 
-        # logger.info params["tagged"] # esta correcto, contiene un username
-        # logger.info settings.userlist #esta correcto, hay un objeto del tipo User
-
-        socketsToBeNotified = []
-        # settings.userlist.each { |taggedUser|  socketsToBeNotified << (findConnection(taggedUser))  }
         settings.userlist.each do |taggedUser|
           socketsToBeNotified << (findConnection(taggedUser)) unless findConnection(taggedUser).nil?
         end
 
-        # logger.info socketsToBeNotified  # ya no es vacio
-        socketsToBeNotified.each { |s| s.send('han cargado un nuevo documento!') }
-        # #settings.sockets.each{ |s|  s[:socket].send("han cargado un nuevo documento!") }
-        # redirect "/documents"
+        sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
+
       end
       redirect '/documents'
     else
@@ -221,6 +150,67 @@ class App < Sinatra::Base
     else
       [500, {}, 'Internal Server Error']
     end
+  end
+end
+
+# clase que contiene las rutas y metodos de la aplicacion.
+class App < Sinatra::Base
+  register Sinatra::ConfigFile
+  use LoginScreen
+  use Documents
+
+  config_file 'config/config.yml'
+
+  configure :development, :production do
+    enable :logging
+    enable :sessions
+    set :session_secret, 'So0perSeKr3t!'
+    set :sessions, true
+    set :server, :thin
+    set :sockets, []
+  end
+
+  before do
+    @path = request.path_info
+
+    if !session[:user_id] && @path != '/login' && @path != '/register'
+      redirect '/login'
+    elsif session[:user_id]
+      @user = User.find(id: session[:user_id])
+      admin? unless @user.nil?
+    end
+  end
+
+  use Rack::Session::Pool, expire_after: 2_592_000
+  def admin?
+    user = User.find(id: session[:user_id]).type
+    @is_admin = true if user == 'admin'
+  end
+  get '/' do
+    if !request.websocket?
+      erb :index, layout: :layoutlogin
+    else
+      request.websocket do |ws|
+        user = session[:user_id]
+        @connection = { user: user, socket: ws }
+        ws.onopen do
+          settings.sockets << @connection
+        end
+        ws.onclose do
+          warn('websocket closed')
+          settings.sockets.delete(ws)
+        end
+      end
+    end
+  end
+
+  # Endpoints for handles profile
+  get '/profile' do
+    @documents = Document.all
+    @user = User.first(id: session[:user_id]).name
+    @mail = User.first(id: session[:user_id]).email
+
+    erb :perfil, layout: :layoutlogin
   end
 
   get '/admin' do
