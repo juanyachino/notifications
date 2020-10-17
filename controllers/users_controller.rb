@@ -8,15 +8,6 @@ require './models/documentsUser.rb'
 # clase que contiene las rutas relacionadas al login y registro de usuario.
 class UsersController < Sinatra::Base
   set :views, settings.root + '/views'
-  def promote_user_to_admin(user)
-    if params[:text] == 'admin'
-      user.update(type: 'admin')
-      erb :perfil, layout: :layoutlogin
-    else
-      @error = 'código incorrecto'
-      erb :admin, layout: :layoutlogin
-    end
-  end
   # Add new user
   get '/register' do
     erb :register
@@ -67,6 +58,11 @@ class UsersController < Sinatra::Base
   end
 
   post '/admin' do
-    promote_user_to_admin(User.find_by_username(params[:username]))
+    if User.promote_user_to_admin(User.find_by_username(params[:username]), params[:text])
+      erb :perfil, layout: :layoutlogin
+    else 
+      @error = 'código incorrecto'
+      erb :admin, layout: :layoutlogin
+    end
   end
 end

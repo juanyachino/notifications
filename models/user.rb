@@ -16,6 +16,13 @@ class User < Sequel::Model
   def self.find_by_username(username)
     find(username: username)
   end
+  def self.promote_user_to_admin(user,password)
+    if password == 'admin'
+      user.update(type: 'admin')
+      return true
+     return false
+    end
+  end
   many_to_many :documents
   many_to_many :init
   set_primary_key :id
