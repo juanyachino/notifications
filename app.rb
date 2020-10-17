@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'sinatra/base'
 require 'sinatra/config_file'
 require './models/user.rb'
@@ -6,20 +7,8 @@ require './models/document.rb'
 require './models/documentsUser.rb'
 require 'sinatra-websocket'
 
-# modulo con metodos que son usados en mas de una clase
-module Utils
-  def find_user_by_id(id)
-    User.find(id: id)
-  end
-
-  def find_user_by_username(username)
-    User.find(username: username)
-  end
-end
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
-
 class UsersController < Sinatra::Base
-  
   def promote_user_to_admin(user)
     if params[:text] == 'admin'
       user.update(type: 'admin')
@@ -35,7 +24,7 @@ class UsersController < Sinatra::Base
   end
 
   post '/register' do
-    if find_user_by_username(params[:username])
+    if User.find_by_username(params[:username])
       @error = 'El Usuario ya existe'
       erb :register
     else
@@ -59,7 +48,7 @@ class UsersController < Sinatra::Base
   end
 
   post '/login' do
-    user = find_user_by_username(params[:username])
+    user = User.find_by_username(params[:username])
     if user && user.password == params[:password]
       session[:user_id] = user.id
       redirect '/'
@@ -79,13 +68,12 @@ class UsersController < Sinatra::Base
   end
 
   post '/admin' do
-    promote_user_to_admin(find_user_by_username(params[:username]))
+    promote_user_to_admin(User.find_by_username(params[:username]))
   end
 end
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
 class DocumentsController < Sinatra::Base
-  helpers Utils
   set :userlist, []
 
   def find_connection(user)
@@ -96,7 +84,7 @@ class DocumentsController < Sinatra::Base
 
   # Endpoints for upload a document
   get '/documents' do
-    if find_user_by_id(session[:user_id]).type == 'admin'
+    if User.find_by_id(session[:user_id]).type == 'admin'
       @is_admin = true
       @documents = Document.all
       @users = User.all
@@ -117,7 +105,7 @@ class DocumentsController < Sinatra::Base
     erb :upload, layout: :layoutlogin
   end
   get '/userdocs' do
-    @documents = find_user_by_id(session[:user_id]).documents
+    @documents = User.find_by_id(session[:user_id]).documents
     erb :userdocs, layout: :layoutlogin
   end
   get '/publicdocs' do
@@ -134,7 +122,7 @@ class DocumentsController < Sinatra::Base
     File.open("./public/#{@filename}", 'wb') do |f|
       f.write(file.read)
     end
-    user = find_user_by_id(session[:user_id]).username
+    user = User.find_by_id(session[:user_id]).username
     doc = Document.new(name: @filename,
                        date: params['date'],
                        uploader: user,
@@ -145,7 +133,7 @@ class DocumentsController < Sinatra::Base
       unless params['tagged'].nil?
 
         ## asignar documento a usuarios etiqutados.
-        params['tagged'].each { |n| settings.userlist << (Users.find_user_by_username(n)) }
+        params['tagged'].each { |n| settings.userlist << (User.find_by_username(n)) }
         settings.userlist.each { |u| u.add_document(doc) }
 
         sockets_to_be_notified = []
@@ -183,7 +171,6 @@ class App < Sinatra::Base
   register Sinatra::ConfigFile
   use UsersController
   use DocumentsController
-  helpers Utils
   config_file 'config/config.yml'
 
   configure :development, :production do
@@ -195,7 +182,7 @@ class App < Sinatra::Base
     set :sockets, []
   end
   def admin?
-    @is_admin = true if find_user_by_id(session[:user_id]).type == 'admin'
+    @is_admin = true if User.find_by_id(session[:user_id]).type == 'admin'
   end
   before do
     @path = request.path_info
@@ -203,7 +190,7 @@ class App < Sinatra::Base
     if !session[:user_id] && @path != '/login' && @path != '/register'
       redirect '/login'
     elsif session[:user_id]
-      admin? unless find_user_by_id(session[:user_id]).nil?
+      admin? unless User.find_by_id(session[:user_id]).nil?
     end
   end
 
