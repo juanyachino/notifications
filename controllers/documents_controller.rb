@@ -12,6 +12,8 @@ class DocumentsController < Sinatra::Base
   set :views, settings.root + '/views'
   set :userlist, []
 
+  attr_accessor :users, :documents, :is_admin
+
   def find_connection(user)
     App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
 
@@ -20,9 +22,9 @@ class DocumentsController < Sinatra::Base
 
   def get_documents(user)
     if user == 'admin'
-      @is_admin = true
-      @documents = Document.all
-      @users = User.all
+      self.is_admin = true
+      self.documents = Document.all
+      self.users = User.all
       erb :upload, layout: :layoutlogin
     else
       @error = 'Para acceder a documentos debe ser administrador, ' \
@@ -41,15 +43,15 @@ class DocumentsController < Sinatra::Base
 
     doc_date = params[:date] == '' ? filter_docs : Document.first(date: params[:date])
     filter_docs = params[:date] == '' ? filter_docs : filter_docs.select { |d| d.date == doc_date.date }
-    @documents = filter_docs
+    self.documents = filter_docs
     erb :upload, layout: :layoutlogin
   end
   get '/userdocs' do
-    @documents = User.find_by_id(session[:user_id]).documents
+    self.documents = User.find_by_id(session[:user_id]).documents
     erb :userdocs, layout: :layoutlogin
   end
   get '/publicdocs' do
-    @documents = Document.all
+    self.documents = Document.all
     erb :publicdocs, layout: :layoutlogin
   end
   get '/showdocument' do
