@@ -33,7 +33,7 @@ class DocumentsController < Sinatra::Base
 
   # Endpoints for upload a document
   get '/documents' do
-    get_documents(User.find(id: session[:user_id]).type)
+    get_documents(User.find_by_id(session[:user_id]).type)
   end
 
   post '/documents' do
