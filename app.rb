@@ -129,7 +129,7 @@ class DocumentsController < Sinatra::Base
                        subject: params['subject'])
 
     if doc.save
-
+      ## extraer esta parte de codigo en un nuevo metodo
       unless params['tagged'].nil?
 
         ## asignar documento a usuarios etiqutados.
@@ -195,7 +195,6 @@ class App < Sinatra::Base
   end
 
   use Rack::Session::Pool, expire_after: 2_592_000
-
   get '/' do
     if !request.websocket?
       erb :index, layout: :layoutlogin
@@ -222,7 +221,6 @@ class App < Sinatra::Base
 
     erb :perfil, layout: :layoutlogin
   end
-
   ###
   get '/tos' do
     erb :ToS, layout: :layoutlogin
