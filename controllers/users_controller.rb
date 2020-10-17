@@ -9,40 +9,21 @@ require 'ostruct'
 # clase que contiene las rutas relacionadas al login y registro de usuario.
 class UsersController < Sinatra::Base
   set :views, settings.root + '/views'
-  def creation_user(usuario)
-    request.body.rewind
-      hash = Rack::Utils.parse_nested_query(request.body.read)
-      params = JSON.parse hash.to_json
-      user = User.new(name: usuario[:name],
-                      email: usuario[:email],
-                      username: usuario[:username],
-                      password: usuario[:password])
-      if user.save
-        redirect '/login'
-      else
-        [500, {}, 'Internal Server Error']
-      end
-  end
-
-  def user_register(usuario)
-    if User.find_by_username(usuario[:username])
-      @error = 'El Usuario ya existe'
-      erb :register
-    else
-      creation_user(usuario)
-    end
-  end  
+  
   # Add new user
   get '/register' do
     erb :register
   end
 
   post '/register' do
+    request.body.rewind
+    hash = Rack::Utils.parse_nested_query(request.body.read)
+    params = JSON.parse hash.to_json
     hash = { :name => params['name'], 
-               :email => params['email'],
-               :username => params['username'],
-               :password => params['psw'] }
-    user_register(OpenStruct.new(hash))
+             :email => params['email'],
+             :username => params['username'],
+             :password => params['psw'] }
+    redirect '/login' unless !User.register(OpenStruct.new(hash))
   end
   # Login Endpoints
   get '/login' do
