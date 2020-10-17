@@ -9,17 +9,9 @@ require 'sinatra-websocket'
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
 class LoginScreen < Sinatra::Base
-  # Add new user
-  get '/register' do
-    erb :register
-  end
-
-  post '/register' do
-    if User.find(username: params[:username])
-      @error = 'El Usuario ya existe'
-      erb :register
-    else
-      request.body.rewind
+  
+  def creation_user(usuario)
+    request.body.rewind
       hash = Rack::Utils.parse_nested_query(request.body.read)
       params = JSON.parse hash.to_json
       user = User.new(name: params['name'],
@@ -31,7 +23,24 @@ class LoginScreen < Sinatra::Base
       else
         [500, {}, 'Internal Server Error']
       end
+  end
+
+  def user_register(usuario)
+    if usuario
+      @error = 'El Usuario ya existe'
+      erb :register
+    else
+      creation_user(usuario)
     end
+  end  
+
+  # Add new user
+  get '/register' do
+    erb :register
+  end
+
+  post '/register' do
+    user_register(User.find(username: params[:username]))
   end
   # Login Endpoints
   get '/login' do
