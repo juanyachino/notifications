@@ -169,7 +169,7 @@ class App < Sinatra::Base
     set :server, :thin
     set :sockets, []
   end
-  
+
   before do
     @path = request.path_info
 
@@ -186,6 +186,7 @@ class App < Sinatra::Base
     user = User.find(id: session[:user_id]).type
     @is_admin = true if user == 'admin'
   end
+
   def promote_user_to_admin(user)
     if params[:text] == 'admin'
       user.update(type: 'admin')
