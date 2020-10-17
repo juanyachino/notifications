@@ -22,6 +22,9 @@ class App < Sinatra::Base
     set :server, :thin
     set :sockets, []
   end
+
+  attr_accessor :documents, :user, :mail
+
   def admin?
     @is_admin = true if User.find_by_id(session[:user_id]).type == 'admin'
   end
@@ -56,9 +59,9 @@ class App < Sinatra::Base
 
   # Endpoints for handles profile
   get '/profile' do
-    @documents = Document.all
-    @user = User.first(id: session[:user_id]).name
-    @mail = User.first(id: session[:user_id]).email
+    self.documents = Document.all
+    self.user = User.first(id: session[:user_id]).name
+    self.mail = User.first(id: session[:user_id]).email
 
     erb :perfil, layout: :layoutlogin
   end
