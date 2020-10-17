@@ -25,16 +25,11 @@ class UsersController < Sinatra::Base
   end
 
   def user_register(usuario)
-    if usuario
+    if User.find_by_username(usuario[:username])
       @error = 'El Usuario ya existe'
       erb :register
     else
-      hash = { :name => params['name'], 
-               :email => params['email'],
-               :username => params['username'],
-               :password => params['psw'] }
-      ##OpenStruct.new(hash)
-      creation_user(OpenStruct.new(hash))
+      creation_user(usuario)
     end
   end  
   # Add new user
@@ -43,7 +38,11 @@ class UsersController < Sinatra::Base
   end
 
   post '/register' do
-    user_register(User.find_by_username(params[:username]))
+    hash = { :name => params['name'], 
+               :email => params['email'],
+               :username => params['username'],
+               :password => params['psw'] }
+    user_register(OpenStruct.new(hash))
   end
   # Login Endpoints
   get '/login' do
