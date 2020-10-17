@@ -8,14 +8,23 @@ require './models/documentsUser.rb'
 require 'sinatra-websocket'
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
-class LoginScreen < Sinatra::Base
+class UsersController < Sinatra::Base
+  def promote_user_to_admin(user)
+    if params[:text] == 'admin'
+      user.update(type: 'admin')
+      erb :perfil, layout: :layoutlogin
+    else
+      @error = 'código incorrecto'
+      erb :admin, layout: :layoutlogin
+    end
+  end
   # Add new user
   get '/register' do
     erb :register
   end
 
   post '/register' do
-    if User.find(username: params[:username])
+    if User.find_by_username(params[:username])
       @error = 'El Usuario ya existe'
       erb :register
     else
@@ -39,9 +48,9 @@ class LoginScreen < Sinatra::Base
   end
 
   post '/login' do
-    users = User.find(username: params[:username])
-    if users && users.password == params[:password]
-      session[:user_id] = users.id
+    user = User.find_by_username(params[:username])
+    if user && user.password == params[:password]
+      session[:user_id] = user.id
       redirect '/'
     else
       @error = 'Usuario o contraseña incorrecta'
@@ -54,10 +63,17 @@ class LoginScreen < Sinatra::Base
     # response.set_cookie("user_id", value: "", expires: Time.now - 100 )
     redirect '/'
   end
+  get '/admin' do
+    erb :admin, layout: :layoutlogin
+  end
+
+  post '/admin' do
+    promote_user_to_admin(User.find_by_username(params[:username]))
+  end
 end
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
-class Documents < Sinatra::Base
+class DocumentsController < Sinatra::Base
   set :userlist, []
 
   def find_connection(user)
@@ -93,8 +109,7 @@ class Documents < Sinatra::Base
     erb :upload, layout: :layoutlogin
   end
   get '/userdocs' do
-    user = User.find(id: session[:user_id])
-    @documents = user.documents # #muestro los documentos de interes del usuario
+    @documents = User.find_by_id(session[:user_id]).documents
     erb :userdocs, layout: :layoutlogin
   end
   get '/publicdocs' do
@@ -111,18 +126,18 @@ class Documents < Sinatra::Base
     File.open("./public/#{@filename}", 'wb') do |f|
       f.write(file.read)
     end
-    user = User.find(id: session[:user_id]).username
+    user = User.find_by_id(session[:user_id]).username
     doc = Document.new(name: @filename,
                        date: params['date'],
                        uploader: user,
                        subject: params['subject'])
 
     if doc.save
-
+      ## extraer esta parte de codigo en un nuevo metodo
       unless params['tagged'].nil?
 
         ## asignar documento a usuarios etiqutados.
-        params['tagged'].each { |n| settings.userlist << (User.find(username: n)) }
+        params['tagged'].each { |n| settings.userlist << (User.find_by_username(n)) }
         settings.userlist.each { |u| u.add_document(doc) }
 
         sockets_to_be_notified = []
@@ -155,13 +170,11 @@ class Documents < Sinatra::Base
     end
   end
 end
-
 # clase que contiene las rutas y metodos de la aplicacion.
 class App < Sinatra::Base
   register Sinatra::ConfigFile
-  use LoginScreen
-  use Documents
-
+  use UsersController
+  use DocumentsController
   config_file 'config/config.yml'
 
   configure :development, :production do
@@ -172,23 +185,20 @@ class App < Sinatra::Base
     set :server, :thin
     set :sockets, []
   end
-
+  def admin?
+    @is_admin = true if User.find_by_id(session[:user_id]).type == 'admin'
+  end
   before do
     @path = request.path_info
 
     if !session[:user_id] && @path != '/login' && @path != '/register'
       redirect '/login'
     elsif session[:user_id]
-      @user = User.find(id: session[:user_id])
-      admin? unless @user.nil?
+      admin? unless User.find_by_id(session[:user_id]).nil?
     end
   end
 
   use Rack::Session::Pool, expire_after: 2_592_000
-  def admin?
-    user = User.find(id: session[:user_id]).type
-    @is_admin = true if user == 'admin'
-  end
   get '/' do
     if !request.websocket?
       erb :index, layout: :layoutlogin
@@ -215,26 +225,6 @@ class App < Sinatra::Base
 
     erb :perfil, layout: :layoutlogin
   end
-
-  get '/admin' do
-    erb :admin, layout: :layoutlogin
-  end
-
-  post '/admin' do
-    if User.find(username: params[:username])
-      codigo = params[:text]
-      if codigo == 'admin'
-        User.where(username: params[:username]).update(type: 'admin')
-        erb :perfil, layout: :layoutlogin
-      else
-        @error = 'código incorrecto'
-        erb :admin, layout: :layoutlogin
-      end
-    else
-      @error = 'Hay algo que no está bien'
-    end
-  end
-
   ###
   get '/tos' do
     erb :ToS, layout: :layoutlogin
