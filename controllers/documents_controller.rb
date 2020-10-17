@@ -9,6 +9,7 @@ require 'sinatra-websocket'
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
 class DocumentsController < Sinatra::Base
+  set :views, settings.root + '/views'
   set :userlist, []
 
   def find_connection(user)

@@ -7,6 +7,7 @@ require './models/documentsUser.rb'
 
 # clase que contiene las rutas relacionadas al login y registro de usuario.
 class UsersController < Sinatra::Base
+  set :views, settings.root + '/views'
   def promote_user_to_admin(user)
     if params[:text] == 'admin'
       user.update(type: 'admin')
