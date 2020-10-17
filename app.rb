@@ -82,9 +82,8 @@ class DocumentsController < Sinatra::Base
     nil # Por si el usuario no esta conectado en ese momento
   end
 
-  # Endpoints for upload a document
-  get '/documents' do
-    if User.find_by_id(session[:user_id]).type == 'admin'
+  def get_documents(user)
+    if user == 'admin'
       @is_admin = true
       @documents = Document.all
       @users = User.all
@@ -94,6 +93,11 @@ class DocumentsController < Sinatra::Base
                'si desea serlo complete los campos'
       erb :admin, layout: :layoutlogin
     end
+  end
+
+  # Endpoints for upload a document
+  get '/documents' do
+    get_documents(User.find(id: session[:user_id]).type)
   end
 
   post '/documents' do
