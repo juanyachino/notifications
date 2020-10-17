@@ -1,0 +1,101 @@
+<html>
+    <head>
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+
+
+<!-- (Optional) Latest compiled and minified JavaScript translation files -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+            <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+            <script type="text/javascript" src="/bootstrap-select-1.13.14/dist/js/bootstrap-select.js"></script> 
+        <style>
+          table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+          }
+
+          td, th {
+            border: 1px solid #0066ff;
+            text-align: left;
+            padding: 8px;
+          }
+
+          
+        </style>
+        <title>TODOS LOS DOCUMENTOS</title>
+    </head>
+    <body>
+       <div class="dropdown">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Que documentos mostrar?
+          </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="/userdocs">Solo Documentos de mi interes</a>
+          <a class="dropdown-item" href="/publicdocs">Todos los documentos</a>
+        </div>
+       </div>
+
+        <div class="container mt-3">
+        
+  
+        <h2>Documentos cargados</h2>
+                
+                <input class="form-control" id="myInput" type="text" placeholder="Buscar por Asunto, fecha, usuarios...">
+         <br>
+        
+     
+        <table class="table table-bordered">
+                <thead>
+      
+		    <tr>
+		        <th scope="col">Nombre</th>
+		    	  <th scope="col">Fecha</th>
+		        <th scope="col">Subido por</th>
+		        <th scope="col">Asunto</th>
+            
+		    </tr>
+		    </thead>
+		     <% @documents.each do |doc| %>
+		    <tbody id="myTable">
+		 
+    	    <tr>
+           <th><a  href="/view/<%= doc.name %>"><%= doc.name %></a></th>
+ 			     <td><%= doc.date %></td>
+ 			     <td><%= doc.uploader %></td>
+ 			     <td><%= doc.subject %></td>
+           
+			     <% end %>
+		      </tr>
+		    </tbody>
+		</table>
+    <script>
+        // Add the following code if you want the name of the file appear on select
+$(".custom-file-input").on("change", function() {
+  var fileName = $(this).val().split("\\").pop();
+  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+</script>
+<script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+    
+ 
+  </body>
+
+</html>
