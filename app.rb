@@ -115,7 +115,7 @@ class Documents < Sinatra::Base
                        subject: params['subject'])
 
     if doc.save
-
+      ## extraer esta parte de codigo en un nuevo metodo
       unless params['tagged'].nil?
 
         ## asignar documento a usuarios etiqutados.
@@ -186,6 +186,16 @@ class App < Sinatra::Base
     user = User.find(id: session[:user_id]).type
     @is_admin = true if user == 'admin'
   end
+
+  def promote_user_to_admin(user)
+    if params[:text] == 'admin'
+      user.update(type: 'admin')
+      erb :perfil, layout: :layoutlogin
+    else
+      @error = 'código incorrecto'
+      erb :admin, layout: :layoutlogin
+    end
+  end
   get '/' do
     if !request.websocket?
       erb :index, layout: :layoutlogin
@@ -218,18 +228,7 @@ class App < Sinatra::Base
   end
 
   post '/admin' do
-    if User.find(username: params[:username])
-      codigo = params[:text]
-      if codigo == 'admin'
-        User.where(username: params[:username]).update(type: 'admin')
-        erb :perfil, layout: :layoutlogin
-      else
-        @error = 'código incorrecto'
-        erb :admin, layout: :layoutlogin
-      end
-    else
-      @error = 'Hay algo que no está bien'
-    end
+    promote_user_to_admin(User.find(username: params[:username]))
   end
 
   ###
