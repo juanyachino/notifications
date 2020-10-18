@@ -23,4 +23,7 @@ class UserServices < Sinatra::Base
     User.promote_to_admin(User.find_by_username(username))
     return true
   end
+  def self.admin?(actual_user)
+    User.find_by_id(actual_user).type == 'admin'
+  end
 end

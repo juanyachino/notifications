@@ -4,6 +4,7 @@ require 'sinatra/base'
 require 'sinatra/config_file'
 require 'sinatra-websocket'
 require './controllers/users_controller.rb'
+require './services/UserServices.rb'
 require './controllers/documents_controller.rb'
 
 # clase que contiene las rutas y metodos de la aplicacion.
@@ -11,6 +12,7 @@ class App < Sinatra::Base
   register Sinatra::ConfigFile
   use UsersController
   use DocumentsController
+  use UserServices
   config_file 'config/config.yml'
   set :views, settings.root + '/controllers/views'
 
@@ -25,16 +27,13 @@ class App < Sinatra::Base
 
   attr_accessor :documents, :user, :mail
 
-  def admin?
-    @is_admin = true if User.find_by_id(session[:user_id]).type == 'admin'
-  end
   before do
     @path = request.path_info
 
     if !session[:user_id] && @path != '/login' && @path != '/register'
       redirect '/login'
     elsif session[:user_id]
-      admin? unless User.find_by_id(session[:user_id]).nil?
+      @is_admin = UserServices.admin?(session[:user_id]) unless User.find_by_id(session[:user_id]).nil?
     end
   end
 
