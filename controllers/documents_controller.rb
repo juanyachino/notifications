@@ -65,7 +65,7 @@ class DocumentsController < Sinatra::Base
         settings.userlist.each do |tagged_user|
           sockets_to_be_notified << (User.find_connection(tagged_user)) unless User.find_connection(tagged_user).nil?
         end
-        #podria ser un metodo de user
+        #podria ser un metodo de userService
         sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
       ## fin metodo
       end

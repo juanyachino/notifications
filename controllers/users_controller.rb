@@ -2,8 +2,6 @@
 
 require 'sinatra/base'
 require './models/user.rb'
-require './models/document.rb'
-require './models/documentsUser.rb'
 require './services/UserServices.rb'
 require 'ostruct'
 
@@ -25,7 +23,6 @@ class UsersController < Sinatra::Base
              :username => params['username'],
              :password => params['psw'] }
     redirect '/login' unless !UserServices.register(OpenStruct.new(hash))
-    #redirect '/login' unless !User.register(OpenStruct.new(hash))
     @error = 'El usuario ya existe'
     erb :register
   end
@@ -54,10 +51,8 @@ class UsersController < Sinatra::Base
   end
 
   post '/admin' do
-    if UserServices.validate_admin_pw(params[:text])
-    ##if params[:text] == 'admin'
-       User.promote_to_admin(User.find_by_username(params[:username]))
-       erb :perfil, layout: :layoutlogin
+    if UserServices.validate_admin_pw(params[:username],params[:text])
+      erb :perfil, layout: :layoutlogin
     else 
       @error = 'código incorrecto'
       erb :admin, layout: :layoutlogin
