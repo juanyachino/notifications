@@ -69,21 +69,7 @@ class DocumentsController < Sinatra::Base
 
     if doc.save
       ## extraer esta parte de codigo en un nuevo metodo
-      unless params['tagged'].nil?
-
-        ## asignar documento a usuarios etiqutados.
-        params['tagged'].each { |n| settings.userlist << (User.find_by_username(n)) }
-        settings.userlist.each { |u| u.add_document(doc) }
-
-        sockets_to_be_notified = []
-
-        settings.userlist.each do |tagged_user|
-          sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
-        end
-
-        sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
-
-      end
+      tagged_document(doc)
       redirect '/documents'
     else
       [500, {}, 'Internal Server Error']
@@ -95,6 +81,21 @@ class DocumentsController < Sinatra::Base
     file = params[:file][:tempfile]
     File.open("./public/#{@filename}", 'wb') do |f|
       f.write(file.read)
+    end
+  end
+
+  def tagged_document(doc)
+    unless params['tagged'].nil?
+        ## asignar documento a usuarios etiqutados.
+        params['tagged'].each { |n| settings.userlist << (User.find_by_username(n)) }
+        settings.userlist.each { |u| u.add_document(doc) }
+
+        sockets_to_be_notified = []
+
+        settings.userlist.each do |tagged_user|
+          sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
+        end
+        sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
     end
   end
 
