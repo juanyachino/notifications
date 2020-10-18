@@ -1,4 +1,4 @@
-# frozen_string_literal: true# frozen_string_literal: true
+# frozen_string_literal: true
 
 require 'sinatra/base'
 require './models/user.rb'
@@ -51,8 +51,9 @@ class UsersController < Sinatra::Base
   end
 
   post '/admin' do
-    if User.promote_user_to_admin(User.find_by_username(params[:username]), params[:text])
-      erb :perfil, layout: :layoutlogin
+    if params[:text] == 'admin'
+       User.promote_to_admin(User.find_by_username(params[:username]))
+       erb :perfil, layout: :layoutlogin
     else 
       @error = 'código incorrecto'
       erb :admin, layout: :layoutlogin

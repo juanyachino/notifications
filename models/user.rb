@@ -8,7 +8,9 @@ class User < Sequel::Model
     validates_presence %i[name email username password]
     validates_unique [:username]
   end
-
+  def self.get_all
+    User.all
+  end
   def self.find_by_id(id)
     find(id: id)
   end
@@ -16,12 +18,8 @@ class User < Sequel::Model
   def self.find_by_username(username)
     find(username: username)
   end
-  def self.promote_user_to_admin(user,password)
-    if password == 'admin'
+  def self.promote_to_admin(user)
       user.update(type: 'admin')
-      return true
-     return false
-    end
   end
   def self.creation(usuario)
       user = User.new(name: usuario[:name],
@@ -31,7 +29,6 @@ class User < Sequel::Model
       return true unless !user.save
       [500, {}, 'Internal Server Error']
   end
-
   def self.register(usuario)
     if User.find_by_username(usuario[:username])
       @error = 'El Usuario ya existe'
@@ -39,6 +36,11 @@ class User < Sequel::Model
     else
       creation(usuario)
     end
+  end
+  def self.find_connection(user)
+    App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
+
+    nil # Por si el usuario no esta conectado en ese momento
   end  
   many_to_many :documents
   many_to_many :init
