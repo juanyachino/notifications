@@ -33,6 +33,7 @@ class DocumentsController < Sinatra::Base
     end
   end
 
+
   # Endpoints for upload a document
   get '/documents' do
     get_documents(User.find_by_id(session[:user_id]).type)
@@ -59,11 +60,7 @@ class DocumentsController < Sinatra::Base
   end
 
   post '/save_documents' do
-    @filename = params[:file][:filename]
-    file = params[:file][:tempfile]
-    File.open("./public/#{@filename}", 'wb') do |f|
-      f.write(file.read)
-    end
+    create_file
     user = User.find_by_id(session[:user_id]).username
     doc = Document.new(name: @filename,
                        date: params['date'],
@@ -90,6 +87,14 @@ class DocumentsController < Sinatra::Base
       redirect '/documents'
     else
       [500, {}, 'Internal Server Error']
+    end
+  end
+
+  def create_file()
+    @filename = params[:file][:filename]
+    file = params[:file][:tempfile]
+    File.open("./public/#{@filename}", 'wb') do |f|
+      f.write(file.read)
     end
   end
 
