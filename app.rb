@@ -4,7 +4,7 @@ require 'sinatra/base'
 require 'sinatra/config_file'
 require 'sinatra-websocket'
 require './controllers/users_controller.rb'
-require './services/UserServices.rb'
+require './services/user_services.rb'
 require './controllers/documents_controller.rb'
 
 # clase que contiene las rutas y metodos de la aplicacion.

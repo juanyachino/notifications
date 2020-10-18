@@ -15,10 +15,10 @@ class DocumentsController < Sinatra::Base
   # Endpoints for upload a document
   get '/documents' do
     user = User.find_by_id(session[:user_id])
-    if user.type = 'admin'
+    if user.type == 'admin'
       @is_admin = true
-      @documents = Document.get_all
-      @users = User.get_all
+      @documents = Document.bring_all
+      @users = User.bring_all
       erb :upload, layout: :layoutlogin
     else
       @error = 'Para acceder a documentos debe ser administrador, ' \
@@ -65,9 +65,9 @@ class DocumentsController < Sinatra::Base
         settings.userlist.each do |tagged_user|
           sockets_to_be_notified << (User.find_connection(tagged_user)) unless User.find_connection(tagged_user).nil?
         end
-        #podria ser un metodo de userService
+        # podria ser un metodo de userService
         sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
-      ## fin metodo
+        ## fin metodo
       end
       redirect '/documents'
     else
