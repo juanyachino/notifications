@@ -54,7 +54,7 @@ class UsersController < Sinatra::Base
     if UserServices.validate_admin_pw(params[:username], params[:text])
       erb :perfil, layout: :layoutlogin
     else
-      @error = 'código incorrecto'
+      @error = 'código incorrecto o el usuario no existe'
       erb :admin, layout: :layoutlogin
     end
   end
