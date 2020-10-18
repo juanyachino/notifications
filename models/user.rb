@@ -29,14 +29,6 @@ class User < Sequel::Model
       return true unless !user.save
       [500, {}, 'Internal Server Error']
   end
-  def self.register(usuario)
-    if User.find_by_username(usuario[:username])
-      @error = 'El Usuario ya existe'
-      erb :register
-    else
-      creation(usuario)
-    end
-  end
   def self.find_connection(user)
     App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
 

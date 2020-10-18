@@ -4,6 +4,7 @@ require 'sinatra/base'
 require './models/user.rb'
 require './models/document.rb'
 require './models/documentsUser.rb'
+require './services/UserServices.rb'
 require 'ostruct'
 
 # clase que contiene las rutas relacionadas al login y registro de usuario.
@@ -23,7 +24,10 @@ class UsersController < Sinatra::Base
              :email => params['email'],
              :username => params['username'],
              :password => params['psw'] }
-    redirect '/login' unless !User.register(OpenStruct.new(hash))
+    redirect '/login' unless !UserServices.register(OpenStruct.new(hash))
+    #redirect '/login' unless !User.register(OpenStruct.new(hash))
+    @error = 'El usuario ya existe'
+    erb :register
   end
   # Login Endpoints
   get '/login' do
@@ -31,9 +35,8 @@ class UsersController < Sinatra::Base
   end
 
   post '/login' do
-    user = User.find_by_username(params[:username])
-    if user && user.password == params[:password]
-      session[:user_id] = user.id
+    if UserServices.validate_login(params[:username], params[:password]) 
+      session[:user_id] = User.find_by_username(params[:username]).id
       redirect '/'
     else
       @error = 'Usuario o contraseña incorrecta'
@@ -51,7 +54,8 @@ class UsersController < Sinatra::Base
   end
 
   post '/admin' do
-    if params[:text] == 'admin'
+    if UserServices.validate_admin_pw(params[:text])
+    ##if params[:text] == 'admin'
        User.promote_to_admin(User.find_by_username(params[:username]))
        erb :perfil, layout: :layoutlogin
     else 
