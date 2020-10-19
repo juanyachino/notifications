@@ -66,9 +66,7 @@ class DocumentsController < Sinatra::Base
                        date: params['date'],
                        uploader: user,
                        subject: params['subject'])
-
     if doc.save
-      ## extraer esta parte de codigo en un nuevo metodo
       tagged_document(doc)
       redirect '/documents'
     else
