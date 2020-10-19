@@ -56,7 +56,7 @@ class App < Sinatra::Base
     end
     websocket.onclose do
       warn('websocket closed')
-      settings.sockets.delete(ws)
+      settings.sockets.delete(websocket)
     end
   end
 
