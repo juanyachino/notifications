@@ -43,17 +43,26 @@ class App < Sinatra::Base
       erb :index, layout: :layoutlogin
     else
       request.websocket do |ws|
-        user = session[:user_id]
-        @connection = { user: user, socket: ws }
-        ws.onopen do
-          settings.sockets << @connection
-        end
-        ws.onclose do
-          warn('websocket closed')
-          settings.sockets.delete(ws)
-        end
+        @connection = create_connection(ws)
+        handle_websocket(ws, @connection)
       end
     end
+  end
+
+  def handle_websocket(websocket, connection)
+    websocket.onopen do
+      warn('websocket opened')
+      settings.sockets << connection
+    end
+    websocket.onclose do
+      warn('websocket closed')
+      settings.sockets.delete(ws)
+    end
+  end
+
+  def create_connection(websocket)
+    user = session[:user_id]
+    { user: user, socket: websocket }
   end
 
   # Endpoints for handles profile
