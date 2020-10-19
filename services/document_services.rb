@@ -14,7 +14,7 @@ class DocumentServices < Sinatra::Base
     Document.creation(documento)
   end
 
-  def self.tagged_doc(doc, tagged)
+  def self.tag_users(doc, tagged)
     userlist = []
     unless tagged.nil?
       tagged.each { |n| userlist << (User.find_by_username(n)) }
@@ -34,10 +34,12 @@ class DocumentServices < Sinatra::Base
     end
     return OpenStruct.new(hash)
   end
-  def self.create_file(filename, file)
-    @filename = filename
+  def self.create_file(hash)
+    @filename = hash[:filename]
+    @file = hash[:file]
     File.open("./public/#{@filename}", 'wb') do |f|
-      f.write(file.read)
+      f.write(@file.read)
     end
+    Document.create(hash)
   end
 end

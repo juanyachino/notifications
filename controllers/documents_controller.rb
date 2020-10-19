@@ -44,14 +44,15 @@ class DocumentsController < Sinatra::Base
   end
 
   post '/save_documents' do
-    DocumentServices.create_file(params[:file][:filename] , params[:file][:tempfile])
-    user = User.find_by_id(session[:user_id]).username
-    doc = Document.new(name: params[:file][:filename],
-                       date: params['date'],
-                       uploader: user,
-                       subject: params['subject'])
-    if doc.save
-      UserServices.send_notifications(DocumentServices.tagged_doc(doc, params['tagged']))
+    hash = { filename: params[:file][:filename],
+             file: params[:file][:tempfile],
+             date: params['date'],
+             uploader: User.find_by_id(session[:user_id]).username,
+             subject: params['subject'] }
+    
+    doc = DocumentServices.create_file(OpenStruct.new(hash))
+    if doc != nil
+      UserServices.send_notifications(DocumentServices.tag_users(doc, params['tagged'])) 
       redirect '/documents'
     else
       [500, {}, 'Internal Server Error']
