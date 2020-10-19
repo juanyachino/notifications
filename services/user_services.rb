@@ -32,8 +32,17 @@ class UserServices < Sinatra::Base
     User.find_by_id(actual_user).type == 'admin'
   end
 
-  def self.socket_notified(sockets_to_be_notified)
-    sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
+  def self.find_connection(user)
+    App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
+
+    nil # Por si el usuario no esta conectado en ese momento
   end
 
+  def self.send_notifications(userlist)
+    sockets_to_be_notified = []
+    userlist.each do |tagged_user|
+      sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
+    end
+    sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
+  end
 end

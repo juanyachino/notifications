@@ -81,12 +81,4 @@ class App < Sinatra::Base
   post '/contactus' do
     'GRACIAS'
   end
-
-  get '/tag' do
-    erb :tag, layout: :layoutlogin
-  end
-
-  get '/document_upload' do
-    erb :document_upload, layout: :layoutlogin
-  end
 end

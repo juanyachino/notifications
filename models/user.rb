@@ -36,11 +36,7 @@ class User < Sequel::Model
     [500, {}, 'Internal Server Error']
   end
 
-  def self.find_connection(user)
-    App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
-
-    nil # Por si el usuario no esta conectado en ese momento
-  end
+  
   many_to_many :documents
   many_to_many :init
   set_primary_key :id

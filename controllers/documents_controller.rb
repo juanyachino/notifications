@@ -44,36 +44,18 @@ class DocumentsController < Sinatra::Base
   end
 
   post '/save_documents' do
-    create_file
+    DocumentServices.create_file(params[:file][:filename] , params[:file][:tempfile])
     user = User.find_by_id(session[:user_id]).username
-    doc = Document.new(name: @filename,
+    doc = Document.new(name: params[:file][:filename],
                        date: params['date'],
                        uploader: user,
                        subject: params['subject'])
     if doc.save
-      tagged = params['tagged']
-      userlist = DocumentServices.tagged_doc(doc, tagged, settings)
-      socket_notification(userlist)
+      UserServices.send_notifications(DocumentServices.tagged_doc(doc, params['tagged']))
       redirect '/documents'
     else
       [500, {}, 'Internal Server Error']
     end
-  end
-
-  def create_file
-    @filename = params[:file][:filename]
-    file = params[:file][:tempfile]
-    File.open("./public/#{@filename}", 'wb') do |f|
-      f.write(file.read)
-    end
-  end
-
-  def socket_notification(_userlist)
-    sockets_to_be_notified = []
-    settings.userlist.each do |tagged_user|
-      sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
-    end
-    UserServices.socket_notified(sockets_to_be_notified)
   end
 
   get '/view/:doc_name' do
