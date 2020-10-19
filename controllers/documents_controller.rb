@@ -5,6 +5,7 @@ require 'sinatra/config_file'
 require './models/user.rb'
 require './models/document.rb'
 require './models/documentsUser.rb'
+require './services/document_services.rb'
 require 'sinatra-websocket'
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
@@ -14,15 +15,14 @@ class DocumentsController < Sinatra::Base
   attr_accessor :users, :documents, :is_admin
   # Endpoints for upload a document
   get '/documents' do
-    user = User.find_by_id(session[:user_id])
-    if user.type == 'admin'
+    hash = DocumentServices.load_all(session[:user_id])
+    if hash[:error] == nil
       @is_admin = true
-      @documents = Document.bring_all
-      @users = User.bring_all
+      @documents = hash[:documents]
+      @users = hash[:users]
       erb :upload, layout: :layoutlogin
     else
-      @error = 'Para acceder a documentos debe ser administrador, ' \
-               'si desea serlo complete los campos'
+      @error = hash[:error]
       erb :admin, layout: :layoutlogin
     end
   end
