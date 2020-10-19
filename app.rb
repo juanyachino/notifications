@@ -37,18 +37,6 @@ class App < Sinatra::Base
     end
   end
 
-  use Rack::Session::Pool, expire_after: 2_592_000
-  get '/' do
-    if !request.websocket?
-      erb :index, layout: :layoutlogin
-    else
-      request.websocket do |ws|
-        @connection = create_connection(ws)
-        handle_websocket(ws, @connection)
-      end
-    end
-  end
-
   def handle_websocket(websocket, connection)
     websocket.onopen do
       warn('websocket opened')
@@ -63,6 +51,17 @@ class App < Sinatra::Base
   def create_connection(websocket)
     user = session[:user_id]
     { user: user, socket: websocket }
+  end
+  use Rack::Session::Pool, expire_after: 2_592_000
+  get '/' do
+    if !request.websocket?
+      erb :index, layout: :layoutlogin
+    else
+      request.websocket do |ws|
+        @connection = create_connection(ws)
+        handle_websocket(ws, @connection)
+      end
+    end
   end
 
   # Endpoints for handles profile

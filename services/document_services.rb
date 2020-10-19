@@ -22,18 +22,19 @@ class DocumentServices < Sinatra::Base
     end
     userlist
   end
-  def self.load_all (actual_user)
-    if UserServices.admin?(actual_user)
-       hash = { documents: Document.bring_all,
-                users: User.bring_all,
-                error: nil }
-    else
-       hash = { error:'Para acceder a documentos debe ser administrador, ' \
-               'si desea serlo complete los campos'
-               }
-    end
-    return OpenStruct.new(hash)
+
+  def self.load_all(actual_user)
+    hash = if UserServices.admin?(actual_user)
+             { documents: Document.bring_all,
+               users: User.bring_all,
+               error: nil }
+           else
+             { error: 'Para acceder a documentos debe ser administrador, ' \
+                     'si desea serlo complete los campos' }
+           end
+    OpenStruct.new(hash)
   end
+
   def self.create_file(hash)
     @filename = hash[:filename]
     @file = hash[:file]

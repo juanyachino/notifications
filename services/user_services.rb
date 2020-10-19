@@ -23,7 +23,8 @@ class UserServices < Sinatra::Base
 
   def self.validate_admin_pw(username, pass)
     user = User.find_by_username(username)
-    return false unless pass == 'admin' && user != nil
+    return false unless pass == 'admin' && !user.nil?
+
     User.promote_to_admin(user)
     true
   end

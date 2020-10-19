@@ -36,7 +36,6 @@ class User < Sequel::Model
     [500, {}, 'Internal Server Error']
   end
 
-  
   many_to_many :documents
   many_to_many :init
   set_primary_key :id

@@ -17,13 +17,13 @@ class Document < Sequel::Model
   def self.bring_all
     Document.all
   end
-  
+
   def self.create(hash)
     doc = Document.new(name: hash[:filename],
                        date: hash[:date],
                        uploader: hash[:uploader],
                        subject: hash[:subject])
-    doc unless !doc.save
+    doc if doc.save
   end
   one_to_many :users
   set_primary_key :id

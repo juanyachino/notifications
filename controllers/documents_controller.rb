@@ -20,7 +20,7 @@ class DocumentsController < Sinatra::Base
   # Endpoints for upload a document
   get '/documents' do
     hash = DocumentServices.load_all(session[:user_id])
-    if hash[:error] == nil
+    if hash[:error].nil?
       @is_admin = true
       @documents = hash[:documents]
       @users = hash[:users]
@@ -30,7 +30,7 @@ class DocumentsController < Sinatra::Base
       erb :admin, layout: :layoutlogin
     end
   end
- 
+
   get '/userdocs' do
     self.documents = User.find_by_id(session[:user_id]).documents
     erb :userdocs, layout: :layoutlogin
@@ -49,10 +49,10 @@ class DocumentsController < Sinatra::Base
              date: params['date'],
              uploader: User.find_by_id(session[:user_id]).username,
              subject: params['subject'] }
-    
+
     doc = DocumentServices.create_file(OpenStruct.new(hash))
-    if doc != nil
-      UserServices.send_notifications(DocumentServices.tag_users(doc, params['tagged'])) 
+    if !doc.nil?
+      UserServices.send_notifications(DocumentServices.tag_users(doc, params['tagged']))
       redirect '/documents'
     else
       [500, {}, 'Internal Server Error']
