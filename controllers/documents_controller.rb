@@ -5,6 +5,8 @@ require 'sinatra/config_file'
 require './models/user.rb'
 require './models/document.rb'
 require './models/documentsUser.rb'
+require './services/documents_services.rb'
+require './services/user_services.rb'
 require 'sinatra-websocket'
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
@@ -40,7 +42,6 @@ class DocumentsController < Sinatra::Base
 
   post '/documents' do
     filter_docs = Document.all
-
     doc_date = params[:date] == '' ? filter_docs : Document.first(date: params[:date])
     filter_docs = params[:date] == '' ? filter_docs : filter_docs.select { |d| d.date == doc_date.date }
     self.documents = filter_docs
@@ -66,7 +67,9 @@ class DocumentsController < Sinatra::Base
                        uploader: user,
                        subject: params['subject'])
     if doc.save
-      tagged_doc(doc)
+      tagged = params['tagged']
+      userlist = DocumentServices.tagged_doc(doc, tagged, settings)
+      socket_notification(userlist)
       redirect '/documents'
     else
       [500, {}, 'Internal Server Error']
@@ -81,22 +84,12 @@ class DocumentsController < Sinatra::Base
     end
   end
 
-  def tagged_doc(doc)
-    unless params['tagged'].nil?
-      ## asignar documento a usuarios etiqutados.
-      params['tagged'].each { |n| settings.userlist << (User.find_by_username(n)) }
-      settings.userlist.each { |u| u.add_document(doc) }
-
-      socket_notified
-    end
-  end
-
-  def socket_notified
+  def socket_notification(_userlist)
     sockets_to_be_notified = []
     settings.userlist.each do |tagged_user|
       sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
     end
-    sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
+    UserServices.socket_notified(sockets_to_be_notified)
   end
 
   get '/view/:doc_name' do

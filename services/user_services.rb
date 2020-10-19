@@ -31,4 +31,9 @@ class UserServices < Sinatra::Base
   def self.admin?(actual_user)
     User.find_by_id(actual_user).type == 'admin'
   end
+
+  def self.socket_notified(sockets_to_be_notified)
+    sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
+  end
+
 end
