@@ -5,8 +5,9 @@ require 'sinatra/config_file'
 require './models/user.rb'
 require './models/document.rb'
 require './models/documentsUser.rb'
-require './services/documents_services.rb'
 require './services/user_services.rb'
+require './services/document_services.rb'
+
 require 'sinatra-websocket'
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
@@ -16,37 +17,20 @@ class DocumentsController < Sinatra::Base
 
   attr_accessor :users, :documents, :is_admin
 
-  def find_connection(user)
-    App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
-
-    nil # Por si el usuario no esta conectado en ese momento
-  end
-
-  def get_documents(user)
-    if user == 'admin'
-      self.is_admin = true
-      self.documents = Document.all
-      self.users = User.all
+  # Endpoints for upload a document
+  get '/documents' do
+    hash = DocumentServices.load_all(session[:user_id])
+    if hash[:error] == nil
+      @is_admin = true
+      @documents = hash[:documents]
+      @users = hash[:users]
       erb :upload, layout: :layoutlogin
     else
-      @error = 'Para acceder a documentos debe ser administrador, ' \
-               'si desea serlo complete los campos'
+      @error = hash[:error]
       erb :admin, layout: :layoutlogin
     end
   end
-
-  # Endpoints for upload a document
-  get '/documents' do
-    get_documents(User.find_by_id(session[:user_id]).type)
-  end
-
-  post '/documents' do
-    filter_docs = Document.all
-    doc_date = params[:date] == '' ? filter_docs : Document.first(date: params[:date])
-    filter_docs = params[:date] == '' ? filter_docs : filter_docs.select { |d| d.date == doc_date.date }
-    self.documents = filter_docs
-    erb :upload, layout: :layoutlogin
-  end
+ 
   get '/userdocs' do
     self.documents = User.find_by_id(session[:user_id]).documents
     erb :userdocs, layout: :layoutlogin
