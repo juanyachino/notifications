@@ -33,7 +33,6 @@ class DocumentsController < Sinatra::Base
     end
   end
 
-
   # Endpoints for upload a document
   get '/documents' do
     get_documents(User.find_by_id(session[:user_id]).type)
@@ -67,14 +66,14 @@ class DocumentsController < Sinatra::Base
                        uploader: user,
                        subject: params['subject'])
     if doc.save
-      tagged_document(doc)
+      tagged_doc(doc)
       redirect '/documents'
     else
       [500, {}, 'Internal Server Error']
     end
   end
 
-  def create_file()
+  def create_file
     @filename = params[:file][:filename]
     file = params[:file][:tempfile]
     File.open("./public/#{@filename}", 'wb') do |f|
@@ -82,19 +81,22 @@ class DocumentsController < Sinatra::Base
     end
   end
 
-  def tagged_document(doc)
+  def tagged_doc(doc)
     unless params['tagged'].nil?
-        ## asignar documento a usuarios etiqutados.
-        params['tagged'].each { |n| settings.userlist << (User.find_by_username(n)) }
-        settings.userlist.each { |u| u.add_document(doc) }
+      ## asignar documento a usuarios etiqutados.
+      params['tagged'].each { |n| settings.userlist << (User.find_by_username(n)) }
+      settings.userlist.each { |u| u.add_document(doc) }
 
-        sockets_to_be_notified = []
-
-        settings.userlist.each do |tagged_user|
-          sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
-        end
-        sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
+      socket_notified
     end
+  end
+
+  def socket_notified
+    sockets_to_be_notified = []
+    settings.userlist.each do |tagged_user|
+      sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
+    end
+    sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
   end
 
   get '/view/:doc_name' do
