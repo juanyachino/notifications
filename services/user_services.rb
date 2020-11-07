@@ -50,9 +50,8 @@ class UserServices < Sinatra::Base
   def self.load_profile_info(session_id)
     hash = { documents: Document.all,
              user: User.first(id: session_id).name,
-             mail: User.first(id: session_id).email,
-             }
-    info = OpenStruct.new(hash)
+             mail: User.first(id: session_id).email }
+    OpenStruct.new(hash)
   end
 
   def self.handle_websocket(websocket, user)
@@ -60,7 +59,6 @@ class UserServices < Sinatra::Base
     websocket.onopen do
       warn('websocket opened')
       connection
-    end 
+    end
   end
-
 end

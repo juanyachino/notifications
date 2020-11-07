@@ -3,7 +3,7 @@
 require 'sinatra/base'
 require './models/document.rb'
 require './models/user.rb'
-require './models/documentsUser.rb'
+require './models/documents_user.rb'
 require 'ostruct'
 
 # clase que contiene servicios para verificar cosas con usuarios.

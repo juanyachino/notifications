@@ -4,7 +4,7 @@ require 'sinatra/base'
 require 'sinatra/config_file'
 require './models/user.rb'
 require './models/document.rb'
-require './models/documentsUser.rb'
+require './models/documents_user.rb'
 require './services/user_services.rb'
 require './services/document_services.rb'
 
@@ -14,7 +14,7 @@ require 'sinatra-websocket'
 class DocumentsController < Sinatra::Base
   set :views, settings.root + '/../views'
   set :userlist, []
-  
+
   attr_accessor :users, :documents, :is_admin
 
   get '/documents' do

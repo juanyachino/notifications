@@ -14,7 +14,6 @@ class App < Sinatra::Base
   use DocumentsController
   use UserServices
   config_file 'config/config.yml'
-  
 
   configure :development, :production do
     enable :logging
@@ -47,7 +46,7 @@ class App < Sinatra::Base
           settings.sockets << UserServices.handle_websocket(ws, session[:user_id])
         end
         ws.onclose do
-          warn("websocket closed")
+          warn('websocket closed')
           settings.sockets.delete(ws)
         end
       end
