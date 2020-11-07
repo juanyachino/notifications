@@ -8,7 +8,7 @@ require 'ostruct'
 # clase que contiene las rutas relacionadas al login y registro de usuario.
 class UsersController < Sinatra::Base
   set :views, settings.root + '/../views'
-  
+
   # Add new user
   get '/register' do
     erb :register
@@ -57,5 +57,24 @@ class UsersController < Sinatra::Base
       @error = 'código incorrecto o el usuario no existe'
       erb :admin, layout: :layoutlogin
     end
+  end
+  get '/profile' do
+    info = UserServices.load_profile_info(session[:user_id])
+    @documents = info[:documents]
+    @user = info[:user]
+    @mail = info[:mail]
+    erb :perfil, layout: :layoutlogin
+  end
+  get '/tos' do
+    erb :ToS, layout: :layoutlogin
+  end
+  get '/aboutus' do
+    erb :aboutus, layout: :layoutlogin
+  end
+  get '/contactus' do
+    erb :contactus, layout: :layoutlogin
+  end
+  post '/contactus' do
+    'GRACIAS'
   end
 end

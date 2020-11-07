@@ -36,7 +36,7 @@ class UserServices < Sinatra::Base
   def self.find_connection(user)
     App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
 
-    nil # Por si el usuario no esta conectado en ese momento
+    nil
   end
 
   def self.send_notifications(userlist)
@@ -45,5 +45,20 @@ class UserServices < Sinatra::Base
       sockets_to_be_notified << (find_connection(tagged_user)) unless find_connection(tagged_user).nil?
     end
     sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
+  end
+
+  def self.load_profile_info(session_id)
+    hash = { documents: Document.all,
+             user: User.first(id: session_id).name,
+             mail: User.first(id: session_id).email }
+    OpenStruct.new(hash)
+  end
+
+  def self.handle_websocket(websocket, user)
+    connection = { user: user, socket: websocket }
+    websocket.onopen do
+      warn('websocket opened')
+      connection
+    end
   end
 end

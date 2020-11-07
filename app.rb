@@ -14,7 +14,6 @@ class App < Sinatra::Base
   use DocumentsController
   use UserServices
   config_file 'config/config.yml'
-  
 
   configure :development, :production do
     enable :logging
@@ -37,56 +36,20 @@ class App < Sinatra::Base
     end
   end
 
-  def handle_websocket(websocket, connection)
-    websocket.onopen do
-      warn('websocket opened')
-      settings.sockets << connection
-    end
-    websocket.onclose do
-      warn('websocket closed')
-      settings.sockets.delete(websocket)
-    end
-  end
-
-  def create_connection(websocket)
-    user = session[:user_id]
-    { user: user, socket: websocket }
-  end
   use Rack::Session::Pool, expire_after: 2_592_000
   get '/' do
     if !request.websocket?
       erb :index, layout: :layoutlogin
     else
       request.websocket do |ws|
-        @connection = create_connection(ws)
-        handle_websocket(ws, @connection)
+        ws.onopen do
+          settings.sockets << UserServices.handle_websocket(ws, session[:user_id])
+        end
+        ws.onclose do
+          warn('websocket closed')
+          settings.sockets.delete(ws)
+        end
       end
     end
-  end
-
-  # Endpoints for handles profile
-  get '/profile' do
-    self.documents = Document.all
-    self.user = User.first(id: session[:user_id]).name
-    self.mail = User.first(id: session[:user_id]).email
-
-    erb :perfil, layout: :layoutlogin
-  end
-  ###
-  get '/tos' do
-    erb :ToS, layout: :layoutlogin
-  end
-
-  get '/aboutus' do
-    erb :aboutus, layout: :layoutlogin
-  end
-
-  get '/contactus' do
-    erb :contactus, layout: :layoutlogin
-  end
-
-  # Terminar de implementar
-  post '/contactus' do
-    'GRACIAS'
   end
 end
