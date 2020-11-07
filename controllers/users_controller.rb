@@ -7,8 +7,8 @@ require 'ostruct'
 
 # clase que contiene las rutas relacionadas al login y registro de usuario.
 class UsersController < Sinatra::Base
-  set :views, settings.root + '/views'
-
+  set :views, settings.root + '/../views'
+  
   # Add new user
   get '/register' do
     erb :register

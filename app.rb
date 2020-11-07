@@ -14,7 +14,7 @@ class App < Sinatra::Base
   use DocumentsController
   use UserServices
   config_file 'config/config.yml'
-  set :views, settings.root + '/controllers/views'
+  
 
   configure :development, :production do
     enable :logging
