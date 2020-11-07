@@ -43,7 +43,13 @@ class App < Sinatra::Base
       erb :index, layout: :layoutlogin
     else
       request.websocket do |ws|
-        settings.sockets = UserServices.handle_websocket(ws, session[:user_id])
+        ws.onopen do
+          settings.sockets << UserServices.handle_websocket(ws, session[:user_id])
+        end
+        ws.onclose do
+          warn("websocket closed")
+          settings.sockets.delete(ws)
+        end
       end
     end
   end

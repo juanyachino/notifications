@@ -59,13 +59,8 @@ class UserServices < Sinatra::Base
     connection = { user: user, socket: websocket }
     websocket.onopen do
       warn('websocket opened')
-      sockets << connection
-    end
-    websocket.onclose do
-      warn('websocket closed')
-      sockets.delete(websocket)
-    end
-    sockets
+      connection
+    end 
   end
 
 end
