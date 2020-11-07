@@ -46,4 +46,33 @@ class UserServices < Sinatra::Base
     end
     sockets_to_be_notified.each { |s| s.send('han cargado un nuevo documento!') }
   end
+
+  def self.load_profile_info(session_id)
+    hash = { documents: Document.all,
+             user: User.first(id: session_id).name,
+             mail: User.first(id: session_id).email,
+             }
+    info = OpenStruct.new(hash)
+  end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

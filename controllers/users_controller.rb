@@ -58,4 +58,23 @@ class UsersController < Sinatra::Base
       erb :admin, layout: :layoutlogin
     end
   end
+  get '/profile' do
+    info = UserServices.load_profile_info(session[:user_id])
+    @documents = info[:documents]
+    @user = info[:user]
+    @mail = info[:mail]
+    erb :perfil, layout: :layoutlogin
+  end
+  get '/tos' do
+    erb :ToS, layout: :layoutlogin
+  end
+  get '/aboutus' do
+    erb :aboutus, layout: :layoutlogin
+  end
+  get '/contactus' do
+    erb :contactus, layout: :layoutlogin
+  end
+  post '/contactus' do
+    'GRACIAS'
+  end
 end

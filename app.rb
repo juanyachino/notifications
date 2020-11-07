@@ -63,30 +63,4 @@ class App < Sinatra::Base
       end
     end
   end
-
-  # Endpoints for handles profile
-  get '/profile' do
-    self.documents = Document.all
-    self.user = User.first(id: session[:user_id]).name
-    self.mail = User.first(id: session[:user_id]).email
-
-    erb :perfil, layout: :layoutlogin
-  end
-  ###
-  get '/tos' do
-    erb :ToS, layout: :layoutlogin
-  end
-
-  get '/aboutus' do
-    erb :aboutus, layout: :layoutlogin
-  end
-
-  get '/contactus' do
-    erb :contactus, layout: :layoutlogin
-  end
-
-  # Terminar de implementar
-  post '/contactus' do
-    'GRACIAS'
-  end
 end
