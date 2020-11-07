@@ -12,9 +12,9 @@ require 'sinatra-websocket'
 
 # clase que contiene las rutas y metodos relacionados al login y registro de usuario.
 class DocumentsController < Sinatra::Base
-  set :views, settings.root + '/views'
+  set :views, settings.root + '/../views'
   set :userlist, []
-
+  
   attr_accessor :users, :documents, :is_admin
 
   # Endpoints for upload a document
