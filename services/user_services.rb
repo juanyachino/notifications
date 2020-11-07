@@ -36,7 +36,7 @@ class UserServices < Sinatra::Base
   def self.find_connection(user)
     App.sockets.each { |s| return s[:socket] if s[:user] == user.id }
 
-    nil # Por si el usuario no esta conectado en ese momento
+    nil
   end
 
   def self.send_notifications(userlist)
@@ -54,25 +54,18 @@ class UserServices < Sinatra::Base
              }
     info = OpenStruct.new(hash)
   end
+
+  def self.handle_websocket(websocket, user)
+    connection = { user: user, socket: websocket }
+    websocket.onopen do
+      warn('websocket opened')
+      sockets << connection
+    end
+    websocket.onclose do
+      warn('websocket closed')
+      sockets.delete(websocket)
+    end
+    sockets
+  end
+
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

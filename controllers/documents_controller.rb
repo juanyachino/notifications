@@ -17,7 +17,6 @@ class DocumentsController < Sinatra::Base
   
   attr_accessor :users, :documents, :is_admin
 
-  # Endpoints for upload a document
   get '/documents' do
     hash = DocumentServices.load_all(session[:user_id])
     if hash[:error].nil?
