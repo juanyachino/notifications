@@ -27,7 +27,7 @@ class UserServices < Sinatra::Base
   end
 
   def self.validate_admin_pw(username, pass)
-    if user == nil or pass == nil
+    if username == nil or pass == nil
       raise ArgumentError.new("Complete todos los datos")
     end
     user = User.find_by_username(username)
