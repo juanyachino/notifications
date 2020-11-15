@@ -59,7 +59,7 @@ class UsersController < Sinatra::Base
       if UserServices.validate_admin_pw(params[:username], params[:text])
         erb :perfil, layout: :layoutlogin
       end
-    rescue Exception => e
+    rescue ArgumentError => e
       erb :admin, layout: :layoutlogin, locals: { errorMessage: e.message }
     end
   end
