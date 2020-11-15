@@ -11,9 +11,9 @@
 </head>
 
 <body>
-  <% if @error %>
+  <% if defined? errorMessage %>
       <div class="form-text text-danger" role="alert">
-        <%= @error%>
+        <%= errorMessage %>
       </div>
   <% end %>
   <div class="register-photo" style="background-color: #ffffff;;">

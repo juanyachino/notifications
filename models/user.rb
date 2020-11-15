@@ -31,12 +31,15 @@ class User < Sequel::Model
                     email: usuario[:email],
                     username: usuario[:username],
                     password: usuario[:password])
-    return true if user.save
-
-    [500, {}, 'Internal Server Error']
+    if !user.valid?
+        raise ArgumentError.new("Por favor debe completar todos los campos")
+    else
+        user if user.save
+    end
   end
 
   many_to_many :documents
   many_to_many :init
   set_primary_key :id
 end
+
