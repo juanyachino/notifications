@@ -15,18 +15,16 @@ class UsersController < Sinatra::Base
   end
 
   post '/register' do
-    begin
-      request.body.rewind
-      hash = Rack::Utils.parse_nested_query(request.body.read)
-      params = JSON.parse hash.to_json
-      hash = { name: params['name'],
-               email: params['email'],
-               username: params['username'],
-               password: params['psw'] }
-      redirect '/login' if UserServices.register(OpenStruct.new(hash))
-    rescue ArgumentError => e
-      return erb :register, locals: { errorMessage: e.message }
-    end
+    request.body.rewind
+    hash = Rack::Utils.parse_nested_query(request.body.read)
+    params = JSON.parse hash.to_json
+    hash = { name: params['name'],
+             email: params['email'],
+             username: params['username'],
+             password: params['psw'] }
+    redirect '/login' if UserServices.register(OpenStruct.new(hash))
+  rescue ArgumentError => e
+    return erb :register, locals: { errorMessage: e.message }
   end
   # Login Endpoints
   get '/login' do
@@ -34,14 +32,12 @@ class UsersController < Sinatra::Base
   end
 
   post '/login' do
-    begin
-      if UserServices.validate_login(params[:username], params[:password])
-        session[:user_id] = User.find_by_username(params[:username]).id
-        redirect '/'
-      end
-    rescue ArgumentError => e
-      erb :login, locals: { errorMessage: e.message }
+    if UserServices.validate_login(params[:username], params[:password])
+      session[:user_id] = User.find_by_username(params[:username]).id
+      redirect '/'
     end
+  rescue ArgumentError => e
+    erb :login, locals: { errorMessage: e.message }
   end
 
   get '/logout' do
@@ -55,14 +51,11 @@ class UsersController < Sinatra::Base
   end
 
   post '/admin' do
-    begin
-      if UserServices.validate_admin_pw(params[:username], params[:text])
-        erb :perfil, layout: :layoutlogin
-      end
-    rescue ArgumentError => e
-      erb :admin, layout: :layoutlogin, locals: { errorMessage: e.message }
-    end
+    erb :perfil, layout: :layoutlogin if UserServices.validate_admin_pw(params[:username], params[:text])
+  rescue ArgumentError => e
+    erb :admin, layout: :layoutlogin, locals: { errorMessage: e.message }
   end
+  
   get '/profile' do
     info = UserServices.load_profile_info(session[:user_id])
     @documents = info[:documents]

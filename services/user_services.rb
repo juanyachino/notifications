@@ -7,36 +7,28 @@ require 'ostruct'
 # clase que contiene servicios para verificar cosas con usuarios.
 class UserServices < Sinatra::Base
   def self.register(usuario)
-    if !User.find_by_username(usuario[:username])
-      User.creation(usuario)
-    else
-      raise ArgumentError, 'El usuario registrado ya existe'
-    end
+    raise ArgumentError, 'El usuario registrado ya existe' if User.find_by_username(usuario[:username])
+
+    User.creation(usuario)
   end
 
   def self.validate_login(user, pass)
-    if user == nil or pass == nil
-      raise ArgumentError.new("Complete todos los datos")
-    end
+    raise ArgumentError, 'Complete todos los datos' if user.nil? || pass.nil?
+
     user = User.find_by_username(user)
-    if !user.nil? && user.password == pass
-      true
-    else
-      raise ArgumentError.new("Datos incorrectos")
-    end
+    raise ArgumentError, 'Datos incorrectos' if user.nil? || !user.password == pass
+
+    true
   end
 
   def self.validate_admin_pw(username, pass)
-    if username == nil or pass == nil
-      raise ArgumentError.new("Complete todos los datos")
-    end
+    raise ArgumentError, 'Complete todos los datos' if username.nil? || pass.nil?
+
     user = User.find_by_username(username)
-    if pass == 'admin' && !user.nil?
-      User.promote_to_admin(user)
-      true
-    else 
-      raise ArgumentError.new("Codigo incorrecto")
-    end
+    raise ArgumentError, 'Codigo incorrecto' if !pass == 'admin' || user.nil?
+
+    User.promote_to_admin(user)
+    true
   end
 
   def self.admin?(actual_user)
