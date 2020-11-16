@@ -23,8 +23,8 @@ class UsersController < Sinatra::Base
              username: params['username'],
              password: params['psw'] }
     redirect '/login' if UserServices.register(OpenStruct.new(hash))
-    @error = 'El usuario ya existe'
-    erb :register
+  rescue ArgumentError => e
+    return erb :register, locals: { errorMessage: e.message }
   end
   # Login Endpoints
   get '/login' do
@@ -35,10 +35,9 @@ class UsersController < Sinatra::Base
     if UserServices.validate_login(params[:username], params[:password])
       session[:user_id] = User.find_by_username(params[:username]).id
       redirect '/'
-    else
-      @error = 'Usuario o contraseña incorrecta'
-      erb :login
     end
+  rescue ArgumentError => e
+    erb :login, locals: { errorMessage: e.message }
   end
 
   get '/logout' do
@@ -46,18 +45,17 @@ class UsersController < Sinatra::Base
     # response.set_cookie("user_id", value: "", expires: Time.now - 100 )
     redirect '/'
   end
+
   get '/admin' do
     erb :admin, layout: :layoutlogin
   end
 
   post '/admin' do
-    if UserServices.validate_admin_pw(params[:username], params[:text])
-      erb :perfil, layout: :layoutlogin
-    else
-      @error = 'código incorrecto o el usuario no existe'
-      erb :admin, layout: :layoutlogin
-    end
+    erb :perfil, layout: :layoutlogin if UserServices.validate_admin_pw(params[:username], params[:text])
+  rescue ArgumentError => e
+    erb :admin, layout: :layoutlogin, locals: { errorMessage: e.message }
   end
+  
   get '/profile' do
     info = UserServices.load_profile_info(session[:user_id])
     @documents = info[:documents]
