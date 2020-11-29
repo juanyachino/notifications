@@ -4,6 +4,8 @@ require 'sinatra/base'
 require './models/user.rb'
 require './services/user_services.rb'
 require 'ostruct'
+require 'sinatra/base'
+require 'sinatra/config_file'
 
 # clase que contiene las rutas relacionadas al login y registro de usuario.
 class UsersController < Sinatra::Base

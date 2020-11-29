@@ -16,7 +16,7 @@ class UserServices < Sinatra::Base
     raise ArgumentError, 'Complete todos los datos' if user.nil? || pass.nil?
 
     user = User.find_by_username(user)
-    raise ArgumentError, 'Datos incorrectos' if user.nil? || !user.password == pass
+    raise ArgumentError, 'Datos incorrectos' if user.nil? || user.password != pass
 
     true
   end
@@ -25,7 +25,7 @@ class UserServices < Sinatra::Base
     raise ArgumentError, 'Complete todos los datos' if username.nil? || pass.nil?
 
     user = User.find_by_username(username)
-    raise ArgumentError, 'Codigo incorrecto' if !pass == 'admin' || user.nil?
+    raise ArgumentError, 'Codigo incorrecto' if pass != 'admin' || user.nil?
 
     User.promote_to_admin(user)
     true
