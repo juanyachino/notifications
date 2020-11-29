@@ -23,7 +23,8 @@ class UsersController < Sinatra::Base
     hash = { name: params['name'],
              email: params['email'],
              username: params['username'],
-             password: params['psw'] }
+             password: params['psw'],
+             psw: params['psw-repeat'] }
     redirect '/login' if UserServices.register(OpenStruct.new(hash))
   rescue ArgumentError => e
     return erb :register, locals: { errorMessage: e.message }

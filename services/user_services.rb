@@ -8,6 +8,7 @@ require 'ostruct'
 class UserServices < Sinatra::Base
   def self.register(usuario)
     raise ArgumentError, 'El usuario registrado ya existe' if User.find_by_username(usuario[:username])
+    raise ArgumentError, 'Las contraseñas no coinciden' if usuario[:password] != usuario[:psw]
 
     User.creation(usuario)
   end
