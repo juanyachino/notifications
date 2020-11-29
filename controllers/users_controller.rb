@@ -55,12 +55,8 @@ class UsersController < Sinatra::Base
   rescue ArgumentError => e
     erb :admin, layout: :layoutlogin, locals: { errorMessage: e.message }
   end
-  
+
   get '/profile' do
-    info = UserServices.load_profile_info(session[:user_id])
-    @documents = info[:documents]
-    @user = info[:user]
-    @mail = info[:mail]
     erb :perfil, layout: :layoutlogin
   end
   get '/tos' do
