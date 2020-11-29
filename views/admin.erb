@@ -11,9 +11,9 @@
 </head>
 
 <body>
-    <% if @error %>
+    <% if defined? errorMessage %>
       <div class="alert alert-danger" role="alert">
-        <%= @error%>
+        <%= errorMessage%>
       </div>
     <% end %>
   

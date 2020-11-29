@@ -3,7 +3,7 @@
 require 'sinatra/base'
 require './models/document.rb'
 require './models/user.rb'
-require './models/documentsUser.rb'
+require './models/documents_user.rb'
 require 'ostruct'
 
 # clase que contiene servicios para verificar cosas con usuarios.
@@ -16,6 +16,8 @@ class DocumentServices < Sinatra::Base
 
   def self.tag_users(doc, tagged)
     userlist = []
+    raise ArgumentError, 'No se registra archivo, vuelva a intentarlo' if doc.nil?
+
     unless tagged.nil?
       tagged.each { |n| userlist << (User.find_by_username(n)) }
       userlist.each { |u| u.add_document(doc) }
@@ -29,8 +31,7 @@ class DocumentServices < Sinatra::Base
                users: User.bring_all,
                error: nil }
            else
-             { error: 'Para acceder a documentos debe ser administrador, ' \
-                     'si desea serlo complete los campos' }
+             raise ArgumentError, 'Para acceder a documentos debe ser administrador, si desea serlo complete los campos'
            end
     OpenStruct.new(hash)
   end

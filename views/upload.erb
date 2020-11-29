@@ -35,11 +35,16 @@
     </head>
     <body>
         <h1>Cargar documento</h1>
+        <% if defined? errorMessage%>
+          <div class="alert alert-danger" role="alert">
+          <%= errorMessage %>
+          </div>
+        <% end %>
         <form action="/save_documents" method="POST" enctype="multipart/form-data">
-            <div class="input-group mb-3 input-group-sm">
-      <div class="input-group-prepend">
-        <span class="input-group-text">Asunto</span>
-      </div>
+          <div class="input-group mb-3 input-group-sm">
+          <div class="input-group-prepend">
+          <span class="input-group-text">Asunto</span>
+          </div>
       <input type="text" class="form-control" placeholder="Cual es el asunto del documento?" name="subject" required>
     </div>
             

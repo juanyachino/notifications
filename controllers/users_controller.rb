@@ -4,10 +4,12 @@ require 'sinatra/base'
 require './models/user.rb'
 require './services/user_services.rb'
 require 'ostruct'
+require 'sinatra/base'
+require 'sinatra/config_file'
 
 # clase que contiene las rutas relacionadas al login y registro de usuario.
 class UsersController < Sinatra::Base
-  set :views, settings.root + '/views'
+  set :views, settings.root + '/../views'
 
   # Add new user
   get '/register' do
@@ -21,10 +23,11 @@ class UsersController < Sinatra::Base
     hash = { name: params['name'],
              email: params['email'],
              username: params['username'],
-             password: params['psw'] }
+             password: params['psw'],
+             psw: params['psw-repeat'] }
     redirect '/login' if UserServices.register(OpenStruct.new(hash))
-    @error = 'El usuario ya existe'
-    erb :register
+  rescue ArgumentError => e
+    return erb :register, locals: { errorMessage: e.message }
   end
   # Login Endpoints
   get '/login' do
@@ -35,10 +38,9 @@ class UsersController < Sinatra::Base
     if UserServices.validate_login(params[:username], params[:password])
       session[:user_id] = User.find_by_username(params[:username]).id
       redirect '/'
-    else
-      @error = 'Usuario o contraseña incorrecta'
-      erb :login
     end
+  rescue ArgumentError => e
+    erb :login, locals: { errorMessage: e.message }
   end
 
   get '/logout' do
@@ -46,16 +48,30 @@ class UsersController < Sinatra::Base
     # response.set_cookie("user_id", value: "", expires: Time.now - 100 )
     redirect '/'
   end
+
   get '/admin' do
     erb :admin, layout: :layoutlogin
   end
 
   post '/admin' do
-    if UserServices.validate_admin_pw(params[:username], params[:text])
-      erb :perfil, layout: :layoutlogin
-    else
-      @error = 'código incorrecto o el usuario no existe'
-      erb :admin, layout: :layoutlogin
-    end
+    erb :perfil, layout: :layoutlogin if UserServices.validate_admin_pw(params[:username], params[:text])
+  rescue ArgumentError => e
+    erb :admin, layout: :layoutlogin, locals: { errorMessage: e.message }
+  end
+
+  get '/profile' do
+    erb :perfil, layout: :layoutlogin
+  end
+  get '/tos' do
+    erb :ToS, layout: :layoutlogin
+  end
+  get '/aboutus' do
+    erb :aboutus, layout: :layoutlogin
+  end
+  get '/contactus' do
+    erb :contactus, layout: :layoutlogin
+  end
+  post '/contactus' do
+    'GRACIAS'
   end
 end

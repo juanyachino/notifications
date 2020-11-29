@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+</head>
+<body>
+	<p style="color: red; text-align: center; font-size: 40px" >Error al cargar un documento</p>
+	<% if defined? errorMessage %>
+      <div class="alert alert-danger" role="alert">
+        <div style="text-align: center;"><%= errorMessage%></div>
+      </div>
+    <% end %>
+    <form action="/documents" method="get"> 
+    	<div style="margin-left: 40%;"><button href="/upload" style="text-align: center;">Volver a cargar documento</button></div>
+    </form>
+</body>
+</html>
